@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEET Quest — Personal Question Bank</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--text:#18202a;--muted:#667085;--accent:#5b4bdb;--border:#e4e7ec;--good:#16803c;--bad:#c62828}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--text)}
+header{background:#fff;border-bottom:1px solid var(--border);padding:18px 20px;position:sticky;top:0;z-index:5}
+.brand{font-weight:800;font-size:22px} .sub{color:var(--muted);font-size:13px;margin-top:3px}
+main{max-width:920px;margin:0 auto;padding:20px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 4px 16px rgba(16,24,40,.04)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px} label{font-size:13px;font-weight:700;color:#344054} select,input{width:100%;margin-top:6px;padding:12px;border:1px solid #d0d5dd;border-radius:10px;background:white;font-size:15px}
+button{border:0;border-radius:11px;padding:12px 16px;font-weight:750;cursor:pointer} .primary{background:var(--accent);color:#fff} .secondary{background:#eef0ff;color:#3f35a3} .ghost{background:#f2f4f7;color:#344054}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px} .pill{display:inline-block;padding:5px 9px;border-radius:999px;background:#f2f4f7;color:#475467;font-size:12px;margin-right:5px}
+.qnum{color:var(--accent);font-weight:800} .qtext{font-size:19px;line-height:1.45;font-weight:700;margin:12px 0 16px}
+.option{display:block;border:1px solid var(--border);border-radius:12px;padding:13px;margin:9px 0;cursor:pointer;background:#fff}
+.option:hover{border-color:#aaa0ff} .option input{width:auto;margin:0 8px 0 0}
+.correct{border-color:#72c98f!important;background:#effaf2!important} .wrong{border-color:#f19a9a!important;background:#fff2f2!important}
+.explain{margin-top:14px;padding:13px;border-left:4px solid var(--accent);background:#f7f7ff;border-radius:8px;line-height:1.5}
+.hidden{display:none} .score{font-size:30px;font-weight:850} .progress{height:9px;background:#eaecf0;border-radius:99px;overflow:hidden;margin:12px 0} .bar{height:100%;background:var(--accent);width:0}
+.small{font-size:12px;color:var(--muted)} .stats{display:flex;gap:10px;flex-wrap:wrap} .stat{padding:12px 14px;background:#f8f9fc;border-radius:12px;min-width:120px}
+@media(max-width:650px){.grid{grid-template-columns:1fr}main{padding:12px}.qtext{font-size:17px}}
+</style>
+</head>
+<body>
+<header><div class="brand">🧬 NEET Quest</div><div class="sub">Your personal, chapter-wise NEET practice website • v1</div></header>
+<main>
+<section id="setup" class="card">
+<h2>Start a practice session</h2>
+<p class="small">Built to avoid daily caps and locked chapters. Today's content starts with <b>The Living World</b>; the structure already supports the full syllabus.</p>
+<div class="grid">
+<div><label>Class / subject</label><select id="course"></select></div>
+<div><label>Chapter</label><select id="chapter"></select></div>
+<div><label>Question type</label><select id="type"><option>All types</option><option>NCERT-based</option><option>Statement-based</option><option>Assertion–Reason</option><option>Match the following</option></select></div>
+<div><label>Difficulty</label><select id="difficulty"><option>All levels</option><option>Easy</option><option>Medium</option><option>Hard</option></select></div>
+<div><label>Number of questions</label><input id="count" type="number" min="1" max="30" value="10"></div>
+</div>
+<div class="actions"><button class="primary" onclick="startQuiz()">Start Practice</button><button class="secondary" onclick="showStats()">My Progress</button></div>
+<p class="small" id="availability"></p>
+</section>
+
+<section id="quiz" class="card hidden">
+<div id="quizMeta"></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div id="questionArea"></div>
+<div class="actions"><button class="primary" id="nextBtn" onclick="nextQuestion()">Next</button><button class="ghost" onclick="quitQuiz()">Quit</button></div>
+</section>
+
+<section id="result" class="card hidden"></section>
+<section id="stats" class="card hidden"></section>
+</main>
+<script>
+const questions=[{"id": 1, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Which characteristic of living organisms is considered the most obvious manifestation of life in the NCERT discussion?", "opts": ["Growth", "Metabolism", "Reproduction", "Consciousness"], "ans": 3, "exp": "NCERT emphasises consciousness as a defining property of living organisms: all organisms can sense and respond to environmental stimuli."}, {"id": 2, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Growth in living organisms mainly occurs through an increase in the number and/or mass of cells. Which statement is correct?", "opts": ["Growth is absent in plants", "Growth is a defining property only of animals", "Growth can occur internally in living organisms", "Growth always occurs by accumulation of material from outside"], "ans": 2, "exp": "Living organisms show internal growth through cell division and enlargement; this distinguishes biological growth from simple accumulation."}, {"id": 3, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Medium", "q": "Consider the statements: 1. Plants continue to grow throughout their life. 2. Growth in non-living objects can occur by accumulation of material. 3. Growth alone is sufficient to define life. Which is correct?", "opts": ["1 and 2 only", "2 and 3 only", "1 and 3 only", "1, 2 and 3"], "ans": 0, "exp": "Statements 1 and 2 are correct. Growth alone cannot define living organisms because non-living objects may also increase in size by external accumulation."}, {"id": 4, "chapter": "The Living World", "type": "Assertion–Reason", "difficulty": "Medium", "q": "Assertion (A): Reproduction cannot be considered an all-inclusive defining property of living organisms. Reason (R): Some living organisms are sterile and do not reproduce.", "opts": ["Both A and R are true, and R correctly explains A", "Both A and R are true, but R does not explain A", "A is true, but R is false", "A is false, but R is true"], "ans": 0, "exp": "NCERT notes that mules and sterile worker bees are living but do not reproduce, so reproduction is not an all-inclusive property."}, {"id": 5, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Medium", "q": "Which pair is correctly matched?", "opts": ["Taxon — basic unit of classification only", "Species — group of individuals with fundamental similarities", "Genus — collection of related families", "Family — collection of related species"], "ans": 3, "exp": "A family is a higher category containing related genera, while a genus contains related species."}, {"id": 6, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "The basic unit of classification is:", "opts": ["Genus", "Species", "Family", "Order"], "ans": 1, "exp": "Species is the basic unit of classification."}, {"id": 7, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Which sequence represents the taxonomic hierarchy from lower to higher category?", "opts": ["Species → Genus → Family → Order", "Genus → Species → Family → Order", "Species → Family → Genus → Order", "Order → Family → Genus → Species"], "ans": 0, "exp": "The standard ascending sequence is Species → Genus → Family → Order → Class → Phylum/Division → Kingdom."}, {"id": 8, "chapter": "The Living World", "type": "Match the following", "difficulty": "Medium", "q": "Match: A. Herbarium, B. Botanical garden, C. Museum, D. Zoological park with: 1. Living plant collections, 2. Preserved plant specimens, 3. Preserved animal/plant specimens, 4. Living wild-animal collections.", "opts": ["A-2, B-1, C-3, D-4", "A-1, B-2, C-4, D-3", "A-2, B-3, C-1, D-4", "A-3, B-1, C-2, D-4"], "ans": 0, "exp": "Herbaria contain preserved plant specimens; botanical gardens maintain living plants; museums preserve specimens; zoological parks maintain living wild animals."}, {"id": 9, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "A herbarium is primarily a collection of:", "opts": ["Living animals", "Dried, pressed and preserved plant specimens", "Living plants in greenhouses", "Fossils only"], "ans": 1, "exp": "Herbaria are repositories of dried, pressed and preserved plant specimens mounted on sheets."}, {"id": 10, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "A taxonomic key is mainly used for:", "opts": ["Measuring growth", "Identifying organisms", "Determining DNA sequence", "Preserving specimens"], "ans": 1, "exp": "Keys are analytical tools used for identification based on contrasting characters."}, {"id": 11, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Medium", "q": "Taxonomic keys generally work through: 1. A pair of contrasting statements. 2. Selection of one alternative at each step. 3. Identification of an unknown organism.", "opts": ["1 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"], "ans": 3, "exp": "Keys use contrasting characters and sequential choices to arrive at identification."}, {"id": 12, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Binomial nomenclature gives each organism a:", "opts": ["Single common name", "Two-word scientific name", "Three-word scientific name", "Family and order name only"], "ans": 1, "exp": "The scientific name consists of two components: genus and specific epithet."}, {"id": 13, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "In Mangifera indica, Mangifera represents the:", "opts": ["Species", "Specific epithet", "Genus", "Family"], "ans": 2, "exp": "In a binomial name, the first word is the genus and the second is the specific epithet."}, {"id": 14, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Medium", "q": "Which statements about scientific names are correct? 1. The genus name begins with a capital letter. 2. The specific epithet begins with a capital letter. 3. Printed scientific names are italicised.", "opts": ["1 and 3 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"], "ans": 0, "exp": "The genus begins with a capital letter; the specific epithet begins with a small letter. Both words are italicised when printed."}, {"id": 15, "chapter": "The Living World", "type": "Assertion–Reason", "difficulty": "Medium", "q": "Assertion (A): Scientific names are preferred over common names in biology. Reason (R): Common names can vary from region to region and language to language.", "opts": ["Both A and R are true, and R correctly explains A", "Both A and R are true, but R does not explain A", "A is true, but R is false", "A is false, but R is true"], "ans": 0, "exp": "Universal scientific names avoid the ambiguity caused by different local/common names."}, {"id": 16, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "The term 'taxon' refers to:", "opts": ["Only a species", "A taxonomic group of any rank", "Only the highest category", "Only a genus"], "ans": 1, "exp": "Taxon is a unit/category of classification at any rank."}, {"id": 17, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Hard", "q": "Which order of categories is correct from highest to lowest?", "opts": ["Kingdom → Class → Phylum → Order → Family → Genus → Species", "Kingdom → Phylum/Division → Class → Order → Family → Genus → Species", "Species → Genus → Family → Order → Class → Phylum → Kingdom", "Kingdom → Order → Class → Phylum → Family → Genus → Species"], "ans": 1, "exp": "The hierarchy descends as Kingdom → Phylum/Division → Class → Order → Family → Genus → Species."}, {"id": 18, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "Which taxonomic aid is most directly associated with information about plants through preserved specimens?", "opts": ["Herbarium", "Zoological park", "Museum aquarium", "Key"], "ans": 0, "exp": "Herbaria preserve plant specimens and provide reference material for identification and study."}, {"id": 19, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "Which of the following is NOT a taxonomic aid?", "opts": ["Herbarium", "Key", "Botanical garden", "Ribosome"], "ans": 3, "exp": "Ribosome is a cellular structure, not a taxonomic aid."}, {"id": 20, "chapter": "The Living World", "type": "Assertion–Reason", "difficulty": "Hard", "q": "Assertion (A): Consciousness is a defining property of living organisms. Reason (R): All organisms can sense and respond to environmental stimuli.", "opts": ["Both A and R are true, and R correctly explains A", "Both A and R are true, but R does not explain A", "A is true, but R is false", "A is false, but R is true"], "ans": 0, "exp": "NCERT links consciousness with the ability of organisms to sense and respond to environmental stimuli."}, {"id": 21, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Which category comes immediately above genus?", "opts": ["Species", "Family", "Order", "Class"], "ans": 1, "exp": "Family contains one or more related genera."}, {"id": 22, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "Which category comes immediately below family?", "opts": ["Order", "Genus", "Species", "Class"], "ans": 1, "exp": "Genus is the category immediately below family."}, {"id": 23, "chapter": "The Living World", "type": "Match the following", "difficulty": "Medium", "q": "Match the taxonomic category with its typical grouping: A. Genus, B. Family, C. Order, D. Class. 1. Related families, 2. Related species, 3. Related orders, 4. Related genera.", "opts": ["A-2, B-4, C-1, D-3", "A-4, B-2, C-3, D-1", "A-2, B-4, C-3, D-1", "A-4, B-2, C-1, D-3"], "ans": 0, "exp": "Genus groups related species; family groups related genera; order groups related families; class groups related orders."}, {"id": 24, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Hard", "q": "Which statements are correct? 1. A genus may contain one or more closely related species. 2. A family may contain one or more related genera. 3. An order may contain one or more related families.", "opts": ["1 only", "1 and 2 only", "2 and 3 only", "1, 2 and 3"], "ans": 3, "exp": "All three describe the hierarchical grouping used in taxonomy."}, {"id": 25, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "Which is the most inclusive category among the following?", "opts": ["Family", "Order", "Kingdom", "Genus"], "ans": 2, "exp": "Kingdom is more inclusive than order, family or genus."}, {"id": 26, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Easy", "q": "A museum in biological studies may contain:", "opts": ["Only living plants", "Preserved plant and animal specimens", "Only DNA sequences", "Only live wild animals"], "ans": 1, "exp": "Museums preserve specimens of plants and animals for study and reference."}, {"id": 27, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "Zoological parks are useful because they:", "opts": ["Maintain living wild animals for study and observation", "Contain only dried specimens", "Contain only plant specimens", "Replace taxonomic keys"], "ans": 0, "exp": "Zoological parks maintain living wild animals in protected conditions for study and public education."}, {"id": 28, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Medium", "q": "A botanical garden differs from a herbarium because a botanical garden mainly maintains:", "opts": ["Dried pressed specimens", "Living plant collections", "Only animal specimens", "Taxonomic keys"], "ans": 1, "exp": "Botanical gardens maintain living collections of plants."}, {"id": 29, "chapter": "The Living World", "type": "Statement-based", "difficulty": "Medium", "q": "Choose the correct statement about growth:", "opts": ["Growth is completely absent in unicellular organisms", "Growth in living organisms is generally due to cell division and enlargement", "Growth always means reproduction", "Only animals show growth"], "ans": 1, "exp": "Biological growth involves increase in cell number and/or size; unicellular organisms can also grow."}, {"id": 30, "chapter": "The Living World", "type": "NCERT-based", "difficulty": "Hard", "q": "Which pair contains organisms/examples specifically used to illustrate that reproduction is not an all-inclusive defining property of life?", "opts": ["Mule and sterile worker bee", "Dog and cat", "Mango and pea", "Bacteria and fungi"], "ans": 0, "exp": "NCERT uses the mule and sterile worker bees as examples of living organisms that do not reproduce."}];
+const chapters={"Class 11 Biology": ["The Living World", "Biological Classification", "Plant Kingdom", "Animal Kingdom", "Morphology of Flowering Plants", "Anatomy of Flowering Plants", "Structural Organisation in Animals", "Cell: The Unit of Life", "Biomolecules", "Cell Cycle and Cell Division", "Photosynthesis in Higher Plants", "Respiration in Plants", "Plant Growth and Development", "Breathing and Exchange of Gases", "Body Fluids and Circulation", "Excretory Products and their Elimination", "Locomotion and Movement", "Neural Control and Coordination", "Chemical Coordination and Integration"], "Class 12 Biology": ["Sexual Reproduction in Flowering Plants", "Human Reproduction", "Reproductive Health", "Principles of Inheritance and Variation", "Molecular Basis of Inheritance", "Evolution", "Human Health and Disease", "Microbes in Human Welfare", "Biotechnology: Principles and Processes", "Biotechnology and its Applications", "Organisms and Populations", "Ecosystem", "Biodiversity and Conservation"]};
+let session=[], idx=0, score=0, answered=false, currentStart=0;
+
+const course=document.getElementById('course'), chapter=document.getElementById('chapter');
+Object.keys(chapters).forEach(c=>{let o=document.createElement('option');o.textContent=c;o.value=c;course.appendChild(o)});
+
+function fillChapters(){
+ chapter.innerHTML='';
+ const list=chapters[course.value];
+ list.forEach(c=>{let o=document.createElement('option');o.textContent=c;o.value=c;chapter.appendChild(o)});
+}
+course.onchange=fillChapters; fillChapters();
+
+function updateAvailability(){
+ const f=filtered();
+ document.getElementById('availability').textContent=f.length+' question(s) currently available for this filter. v1 content is being built chapter-by-chapter.';
+}
+document.querySelectorAll('select,input').forEach(x=>x.addEventListener('change',updateAvailability));
+updateAvailability();
+
+function filtered(){
+ let t=document.getElementById('type').value,d=document.getElementById('difficulty').value,c=chapter.value;
+ return questions.filter(q=>q.chapter===c&&(t==='All types'||q.type===t)&&(d==='All levels'||q.difficulty===d));
+}
+
+function startQuiz(){
+ let pool=filtered(), n=Math.min(+document.getElementById('count').value||10,pool.length);
+ if(!pool.length){alert('No questions match this filter yet. Try All types / All levels or The Living World.');return}
+ session=[...pool].sort(()=>Math.random()-.5).slice(0,n); idx=0;score=0;answered=false;
+ document.getElementById('setup').classList.add('hidden');document.getElementById('stats').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('quiz').classList.remove('hidden');renderQuestion();
+}
+function renderQuestion(){
+ const q=session[idx]; answered=false;
+ document.getElementById('quizMeta').innerHTML='<span class="qnum">Question '+(idx+1)+' / '+session.length+'</span> <span class="pill">'+q.type+'</span><span class="pill">'+q.difficulty+'</span>';
+ document.getElementById('bar').style.width=(idx/session.length*100)+'%';
+ let opts=q.opts.map((o,i)=>`<label class="option" id="op${i}"><input type="radio" name="answer" value="${i}"> ${String.fromCharCode(65+i)}. ${o}</label>`).join('');
+ document.getElementById('questionArea').innerHTML=`<div class="qtext">${q.q}</div>${opts}<div id="feedback"></div>`;
+ document.getElementById('nextBtn').textContent=idx===session.length-1?'Finish':'Next';
+}
+function nextQuestion(){
+ if(!answered){
+   const chosen=document.querySelector('input[name="answer"]:checked');
+   if(!chosen){alert('Choose an answer first.');return}
+   const val=+chosen.value,q=session[idx];
+   answered=true;
+   document.querySelectorAll('.option').forEach((el,i)=>{if(i===q.ans)el.classList.add('correct');if(i===val&&val!==q.ans)el.classList.add('wrong')});
+   if(val===q.ans)score++;
+   document.getElementById('feedback').innerHTML=`<div class="explain"><b>${val===q.ans?'Correct ✅':'Not quite ❌'}</b><br>${q.exp}</div>`;
+   saveProgress(q,val===q.ans);
+   return;
+ }
+ if(idx<session.length-1){idx++;renderQuestion()}else finishQuiz();
+}
+function saveProgress(q,correct){
+ let p=JSON.parse(localStorage.getItem('neetQuestProgress')||'{}');
+ p[q.id]=p[q.id]||{seen:0,correct:0};
+ p[q.id].seen++;if(correct)p[q.id].correct++;
+ localStorage.setItem('neetQuestProgress',JSON.stringify(p));
+}
+function finishQuiz(){
+ document.getElementById('bar').style.width='100%';document.getElementById('quiz').classList.add('hidden');
+ let pct=Math.round(score/session.length*100);
+ document.getElementById('result').classList.remove('hidden');
+ document.getElementById('result').innerHTML=`<div class="score">${score} / ${session.length}</div><h2>${pct}% accuracy</h2><p>Great. Wrong questions stay trackable on this device.</p><div class="actions"><button class="primary" onclick="backHome()">Practice again</button><button class="secondary" onclick="showStats()">View progress</button></div>`;
+}
+function quitQuiz(){if(confirm('Quit this session?'))backHome()}
+function backHome(){document.getElementById('quiz').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('stats').classList.add('hidden');document.getElementById('setup').classList.remove('hidden');updateAvailability()}
+function showStats(){
+ document.getElementById('setup').classList.add('hidden');document.getElementById('quiz').classList.add('hidden');document.getElementById('result').classList.add('hidden');document.getElementById('stats').classList.remove('hidden');
+ let p=JSON.parse(localStorage.getItem('neetQuestProgress')||'{}'), seen=0,cor=0;
+ Object.values(p).forEach(x=>{seen+=x.seen;cor+=x.correct});
+ document.getElementById('stats').innerHTML=`<h2>My Progress</h2><div class="stats"><div class="stat"><b>${seen}</b><br><span class="small">Questions attempted</span></div><div class="stat"><b>${cor}</b><br><span class="small">Correct answers</span></div><div class="stat"><b>${seen?Math.round(cor/seen*100):0}%</b><br><span class="small">Overall accuracy</span></div></div><p class="small">Progress is stored locally in this browser. No account is required.</p><div class="actions"><button class="primary" onclick="backHome()">Back to practice</button><button class="ghost" onclick="localStorage.removeItem('neetQuestProgress');showStats()">Reset progress</button></div>`;
+}
+</script>
+</body></html>
